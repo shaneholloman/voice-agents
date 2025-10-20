@@ -127,6 +127,8 @@ class VideoSDKHandler:
         cascading_metrics_collector.set_traces_flow_manager(
             self.traces_flow_manager)
 
+        self._last_video_frame = None
+
         if custom_microphone_audio_track:
             self.audio_track = custom_microphone_audio_track
             if audio_sinks:
@@ -433,6 +435,8 @@ class VideoSDKHandler:
                     video_task.cancel()
                     del self.video_listener_tasks[stream.id]
 
+                self._last_video_frame = None
+
         if participant.id != self.meeting.local_participant.id:
             participant.add_event_listener(
                 ParticipantHandler(
@@ -513,6 +517,8 @@ class VideoSDKHandler:
                 await asyncio.sleep(0.01)
 
                 frame = await stream.track.recv()
+
+                self._last_video_frame = frame
                 if self.pipeline:
                     await self.pipeline.on_video_delta(frame)
 
